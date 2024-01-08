@@ -20,7 +20,7 @@ inputs:
     description: Show mock logs
     required: true
     default: .
-  image:
+  docker-image:
     description: Pre-built Docker image to run instead of default.
     required: true
     default: 'fedora:latest'
@@ -35,14 +35,18 @@ runs:
     - id: create-container
       run: |
         mkdir -p ${{ inputs.result-dir }}
-        podman run -dt --privileged -v ${{ inputs.src }}:/in:ro -v ${{ inputs.result-dir }}:/out ${{ inputs.image }} > action.cid
+        podman run -dt --privileged -v ${{ inputs.src }}:/in:ro -v ${{ inputs.result-dir }}:/out ${{ inputs.docker-image }} > action.cid
       shell: bash
 
+    # Skip this job if ${{ inputs.docker-image }} is not the default.  It is expected that any pre-built Docker image
+    # will have mock installed and configured ahead of time.
     - id: init-mock-env
       run: |
         cid=$(cat action.cid)
-        echo "This is SRPMS!"
+        podman exec $cid dnf install -y mock
+        podman exec $cid mock -r ${{ inputs.chroot }} --init
       shell: bash
+      if: ${{ inputs.docker-image }} == 'fedora:latest'
 
     - id: build
       run: |
