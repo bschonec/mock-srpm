@@ -20,7 +20,7 @@ inputs:
     description: Show mock logs
     required: true
     default: .
-  docker-image:
+  image:
     description: Pre-built Docker image to run instead of default.
     required: true
     default: 'fedora:latest'
@@ -46,7 +46,7 @@ runs:
         podman exec $cid dnf install -y mock
         podman exec $cid mock -r ${{ inputs.chroot }} --init
       shell: bash
-      if: ${{ inputs.docker-image }} == 'fedora:latest'
+      if: ${{ inputs.image }} == 'fedora:latest'
 
     - id: build
       run: |
