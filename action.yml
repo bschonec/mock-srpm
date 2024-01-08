@@ -20,6 +20,10 @@ inputs:
     description: Show mock logs
     required: true
     default: .
+  image:
+    description: Pre-built Docker image to run instead of default.
+    required: true
+    default: 'fedora:latest'
 
 runs:
   using: composite
@@ -31,14 +35,13 @@ runs:
     - id: create-container
       run: |
         mkdir -p ${{ inputs.result-dir }}
-        podman run -dt --privileged -v ${{ inputs.src }}:/in:ro -v ${{ inputs.result-dir }}:/out quay.io/brian_schonecker/mock/mock > action.cid
+        podman run -dt --privileged -v ${{ inputs.src }}:/in:ro -v ${{ inputs.result-dir }}:/out ${{ inputs.image }} > action.cid
       shell: bash
 
     - id: init-mock-env
       run: |
         cid=$(cat action.cid)
         echo "This is SRPMS!"
-
       shell: bash
 
     - id: build
