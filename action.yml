@@ -85,6 +85,9 @@ runs:
     - id: create-container
       run: |
         iid=$(cat action.iid || echo "${{ inputs.image }}")
+        # The stable version of mock doesn't run properly under Podman so we'll install a nightly-build
+        # repository to get the fix.
+        podman exec $cid bash -c dnf config-manager --add-repo=https://copr.fedorainfracloud.org/coprs/g/mock/mock/repo/fedora-39/group_mock-mock-fedora-39.repo'
         podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out -v /tmp/cache/mock:/var/cache/mock $iid > action.cid
       shell: bash
 
