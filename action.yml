@@ -86,8 +86,6 @@ runs:
       run: |
         iid=$(cat action.iid || echo "${{ inputs.image }}")
         podman run -dt --privileged $(cat /tmp/mock-container-args) -v ${{ inputs.result-dir }}:/out -v /tmp/cache/mock:/var/cache/mock $iid > action.cid
-        podman exec $cid dnf install dnf-plugins-core
-        podman exec $cid dnf config-manager --add-repo='https://copr.fedorainfracloud.org/coprs/g/mock/mock/repo/fedora-39/group_mock-mock-fedora-39.repo'
       shell: bash
 
     - id: install-mock
@@ -95,6 +93,10 @@ runs:
         cid=$(cat action.cid)
         mockver=$(podman exec $cid mock --version || true)
         if [[ -z $mockver ]]; then
+          # Install dnf plugin that allows the importing of repo files via http URLs.
+          podman exec $cid dnf install dnf-plugins-core
+          # Install bleeding edge Mock repository file that supports DinD.
+          podman exec $cid dnf config-manager --add-repo='https://copr.fedorainfracloud.org/coprs/g/mock/mock/repo/fedora-39/group_mock-mock-fedora-39.repo'
           podman exec $cid dnf install -y mock
           echo "completed=true" >> $GITHUB_OUTPUT
         fi
