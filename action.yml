@@ -94,7 +94,7 @@ runs:
         mockver=$(podman exec $cid mock --version || true)
         if [[ -z $mockver ]]; then
           # Install dnf plugin that allows the importing of repo files via http URLs.
-          podman exec $cid dnf install dnf-plugins-core
+          podman exec $cid dnf install dnf-plugins-core -y
           # Install bleeding edge Mock repository file that supports DinD.
           podman exec $cid dnf config-manager --add-repo='https://copr.fedorainfracloud.org/coprs/g/mock/mock/repo/fedora-39/group_mock-mock-fedora-39.repo'
           podman exec $cid dnf install -y mock
